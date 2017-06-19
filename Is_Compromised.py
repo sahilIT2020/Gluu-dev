@@ -3,7 +3,8 @@
 #
 # Author: Yuriy Movchan
 #
-
+from org.jboss.seam.faces import FacesMessages
+from org.jboss.seam.international import StatusMessage
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -52,8 +53,14 @@ class PersonAuthentication(PersonAuthenticationType):
             if status_attribute_value != None:
                 user_mail = status_attribute_value.getValue()
                 isCompromised = self.is_compromised(user_mail,user_password,configurationAttributes)
+                
                 if (isCompromised ):
                     print user_mail+" password has been compromised."            
+                    facesMessages = FacesMessages.instance()
+                    facesMessages.add(StatusMessage.Severity.ERROR, "Your password has been compromised. Please change password and try Login again!!")
+                    FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+
+
                     return False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                 #userService = UserService.instance()
@@ -107,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
             api_key=str(creds["api_key"])
             api_secret= str(creds["api_secret"])
         except:
-            print "Vericloud API. Initialize notification services. Invalid credentials file '%s' format:" % super_gluu_creds_file
+            print "Vericloud API. Initialize notification services. Invalid credentials file '%s' format:" % vericloud_gluu_creds_file
             return False
         
 
